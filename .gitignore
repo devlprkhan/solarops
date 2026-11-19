@@ -1,0 +1,47 @@
+# Python caches / build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+build/
+dist/
+wheels/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Data (never commit datasets)
+data/raw/
+data/interim/
+data/processed/
+data/external/
+*.csv
+*.parquet
+*.pkl
+*.joblib
+
+# Experiment tracking
+mlruns/
+
+# OS / editor files
+.DS_Store
+.vscode/
+.idea/
+
+# Keep lockfile for reproducibility
+!uv.lock
