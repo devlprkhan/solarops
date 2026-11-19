@@ -35,11 +35,10 @@ data/raw/pvdaq/2023-solar-data-prize/system-2107/
 └── 2107_irradiance_data.csv
 ```
 
-Then run the cleaning pipeline notebook and the tests:
+Then run the cleaning pipeline notebook:
 
 ```bash
 uv run jupyter lab notebooks/02_clean_pipeline.ipynb
-uv run pytest tests/ -v
 ```
 
 ## Project layout
@@ -47,7 +46,6 @@ uv run pytest tests/ -v
 ```text
 src/solarops/pipeline.py   # load → align → split → impute → evaluate
 notebooks/                 # exploration, cleaning pipeline, diagnostics
-tests/                     # smoke tests for data pipeline + baseline model
 scripts/                   # data audit utilities
 data/                      # local datasets (git-ignored)
 ```
@@ -64,6 +62,10 @@ The project uses **PVDAQ System 2107** from the 2023 Solar Data Prize. The data 
 | v1 — linear regression | 38.8 | — | 0.917 |
 
 Chronological split at `2022-07-01`: train on earlier data, test on later data.
+
+## Roadmap / TODO
+
+- Testing and pre-commit hooks are intentionally deferred until the pipeline and model surface stabilise (Stage 2–3).
 
 ## License
 
