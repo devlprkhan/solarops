@@ -90,3 +90,11 @@ def evaluate(model, X, y, name: str) -> dict:
         "RMSE": mean_squared_error(y, pred) ** 0.5,
         "R2":   r2_score(y, pred),
     }
+
+def add_time_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Add hour, month, dayofyear from measured_on. Returns a copy."""
+    out = df.copy()
+    out["hour"]      = out["measured_on"].dt.hour
+    out["month"]     = out["measured_on"].dt.month
+    out["dayofyear"] = out["measured_on"].dt.dayofyear
+    return out
