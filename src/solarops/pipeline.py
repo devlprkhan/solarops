@@ -96,5 +96,5 @@ def add_time_features(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
     out["hour"]      = out["measured_on"].dt.hour
     out["month"]     = out["measured_on"].dt.month
-    out["dayofyear"] = out["measured_on"].dt.dayofyear
+    out["dayofyear"] = out["measured_on"].dt.day_of_year
     return out

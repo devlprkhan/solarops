@@ -1,0 +1,28 @@
+{
+  "version": "v3",
+  "features": [
+    "poa_irradiance_o_149574",
+    "ambient_temperature_o_149575",
+    "wind_speed_o_149576",
+    "hour",
+    "month",
+    "dayofyear"
+  ],
+  "target": "meter_revenue_grade_ac_output_meter_149578",
+  "split_date": "2022-07-01",
+  "train_range": [
+    "2017-12-01 00:00:00",
+    "2022-06-30 23:45:00"
+  ],
+  "test_range": [
+    "2022-07-01 00:00:00",
+    "2023-10-31 23:45:00"
+  ],
+  "metrics": {
+    "MAE": 25.6896,
+    "RMSE": 50.7849,
+    "R2": 0.9518
+  },
+  "trained_at": "2026-11-25T22:35:05",
+  "data": "PVDAQ System 2107"
+}
