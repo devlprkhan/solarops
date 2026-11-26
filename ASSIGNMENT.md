@@ -43,13 +43,14 @@ If it fails, stop and fix setup. Do not proceed until this works.
 
 ## Step 1 — Understand the model you're using
 
-Before building anything, read these files (in order):
+Read these files (in order):
 
 1. `src/solarops/pipeline.py` — how data is loaded and aligned
 2. `src/solarops/predict.py` — how to load the model and make predictions
-3. `models/v3_metadata.json` — model version, features, metrics
-4. `notebooks/07_save_model.ipynb` — working example of loading + predicting
-5. `notebooks/06_reliability_and_anomalies.ipynb` — how trust labels are computed
+3. `src/solarops/dashboard.py` — one-call bridge (`load_test_predictions`, `get_model_card`, `get_anomalies`, `predict_one`)
+4. `models/v3_metadata.json` — model version, features, metrics
+5. `notebooks/07_save_model.ipynb` — working example of loading + predicting
+6. `notebooks/06_reliability_and_anomalies.ipynb` — how trust labels are computed
 
 **Key facts:**
 
@@ -61,14 +62,43 @@ Before building anything, read these files (in order):
 
 ---
 
-## Step 2 — Build the app
+## Step 2 — Study the reference app
 
-Create **`app/streamlit_app.py`** (you make this file).
+Before you build, run **our** production app:
+
+```bash
+uv run streamlit run app/app.py
+```
+
+Click through all 6 pages: **Overview · Anomalies · Investigate · Predict · Model**.
+
+**What you're looking at:**
+
+- A working multi-page Streamlit app (`st.navigation` + `pages/` folder)
+- Real plotly charts, real model predictions
+- Trust labels, anomaly table, custom-input predictor
+
+**Read the code** (it's in `app/`):
+
+- `app/app.py` — entry point, defines page order
+- `app/pages/overview.py` — actual vs predicted + heatmap
+- `app/pages/anomalies.py` — top anomalies + CSV export
+- `app/pages/investigate.py` — day drill-down
+- `app/pages/predict.py` — custom-input prediction
+- `app/pages/model.py` — model card
+
+**Do not copy-paste.** Reviewer will diff and fail it. Use it as **study material** — learn the patterns, then write your own.
+
+---
+
+## Step 3 — Build your app
+
+Create **`student-app/streamlit_app.py`** (a starter with 2 TODOs already exists — extend it).
 
 Run locally with:
 
 ```bash
-uv run streamlit run app/streamlit_app.py
+uv run streamlit run student-app/streamlit_app.py
 ```
 
 ### Required panels (all 5 must exist)
@@ -81,6 +111,8 @@ uv run streamlit run app/streamlit_app.py
 | 4   | **Top-N anomalies table**          | 10–20 rows sorted by residual (actual − predicted). Most negative first = worst underperformance.                                       |
 | 5   | **Model card**                     | Read `models/v3_metadata.json` → show version, MAE, R², trained_at.                                                                     |
 
+The **starter already has** panels 1, 3, 5 working. Your job: fill in **panels 2 and 4**.
+
 ### Optional extension (choose ONE)
 
 - **A.** Click anomaly row → 7-day context plot around that row
@@ -92,28 +124,33 @@ Pick one. Do it well. Don't do all four.
 
 ---
 
-## Step 3 — Rules (strict — auto-fail if broken)
+## Step 4 — Rules (strict — auto-fail if broken)
 
-| ✅ Do                                           | ❌ Don't                                               |
-| ----------------------------------------------- | ------------------------------------------------------ |
-| Use `pipeline.py` and `predict.py` as-is        | Modify `pipeline.py`, `predict.py`, or `models/v3.pkl` |
-| Put your code in `app/`                         | Retrain the model                                      |
-| Write `app/NOTES.md` (what you copied vs wrote) | `try/except: pass` around `predict()`                  |
-| Handle missing POA with a badge                 | Submit without NOTES.md                                |
-| Add only new files in `app/`                    | Modify notebooks 01–07                                 |
+| ✅ Do                                                   | ❌ Don't                                                               |
+| ------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Use `pipeline.py`, `predict.py`, `dashboard.py` as-is   | Modify `pipeline.py`, `predict.py`, `dashboard.py`, or `models/v3.pkl` |
+| Put your code in `student-app/`                         | Retrain the model                                                      |
+| Write `student-app/NOTES.md` (what you copied vs wrote) | `try/except: pass` around `predict()`                                  |
+| Handle missing POA with a badge                         | Submit without NOTES.md                                                |
+| Add only new files in `student-app/`                    | Modify `app/`, `notebooks/01-07`                                       |
 
 **Why so strict?** The pipeline is a shared contract. If your PR changes it,
 other students' PRs break. Wrap what you need, don't touch the base.
 
+**Why can't I copy from `app/`?** Because the point of the assignment is to
+understand the code well enough to rebuild it differently. If your PR is a
+near-identical copy, you'll be asked to explain every line in a live review.
+Don't try it.
+
 ---
 
-## Step 4 — Submit via Pull Request
+## Step 5 — Submit via Pull Request
 
 1. Push your work:
 
    ```bash
    git checkout -b dashboard-<your-name>
-   git add app/ NOTES.md
+   git add student-app/
    git commit -m "dashboard: <your-name> — Streamlit app"
    git push origin dashboard-<your-name>
    ```
@@ -123,31 +160,33 @@ other students' PRs break. Wrap what you need, don't touch the base.
    - Description must include:
      - Screenshot of your running app
      - Which extension you chose (A/B/C/D)
-     - The command the reviewer runs: `uv run streamlit run app/streamlit_app.py`
+     - The command the reviewer runs: `uv run streamlit run student-app/streamlit_app.py`
 
 3. **Do not open the PR until it runs locally without errors.**
 
 ---
 
-## Step 5 — Grading rubric
+## Step 6 — Grading rubric
 
-| #   | Check                                                       | Points |
-| --- | ----------------------------------------------------------- | ------ |
-| 1   | App launches without errors on reviewer's machine           | 15     |
-| 2   | All 5 required panels render correctly                      | 25     |
-| 3   | Actual vs Predicted uses real v3 predictions (not dummy)    | 15     |
-| 4   | Trust labels correct (unreliable_input on missing POA)      | 15     |
-| 5   | Extension works as described                                | 20     |
-| 6   | `NOTES.md` present + no edits to `pipeline.py`/`predict.py` | 10     |
+| #   | Check                                                    | Points |
+| --- | -------------------------------------------------------- | ------ |
+| 1   | App launches without errors on reviewer's machine        | 15     |
+| 2   | All 5 required panels render correctly                   | 25     |
+| 3   | Actual vs Predicted uses real v3 predictions (not dummy) | 15     |
+| 4   | Trust labels correct (unreliable_input on missing POA)   | 15     |
+| 5   | Extension works as described                             | 20     |
+| 6   | `NOTES.md` present + no edits to shared files            | 10     |
 
 **Passing = 70. Excellent = 90+.**
 
 **Auto-fail:**
 
-- Modified `pipeline.py`, `predict.py`, or `v3.pkl`
+- Modified `pipeline.py`, `predict.py`, `dashboard.py`, or `v3.pkl`
+- Modified anything in `app/`
 - `predict()` wrapped in bare `try/except`
 - App doesn't launch on reviewer's machine
 - No `NOTES.md`
+- **Near-identical copy of `app/streamlit_app.py`** — will be caught in review
 
 ---
 
