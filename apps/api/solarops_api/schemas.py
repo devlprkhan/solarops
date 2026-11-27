@@ -24,9 +24,9 @@ class ModelInfoResponse(BaseModel):
 
 
 class PredictRequest(BaseModel):
-    poa_irradiance: float = Field(..., ge=0, description="Plane-of-array irradiance (W/m²)")
-    ambient_temperature: float = Field(..., ge=-50, le=60, description="Ambient temperature (°C)")
-    wind_speed: float = Field(..., ge=0, le=40, description="Wind speed (m/s)")
+    poa_irradiance: float = Field(..., ge=0, allow_inf_nan=False, description="Plane-of-array irradiance (W/m²)")
+    ambient_temperature: float = Field(..., ge=-50, le=60, allow_inf_nan=False, description="Ambient temperature (°C)")
+    wind_speed: float = Field(..., ge=0, le=40, allow_inf_nan=False, description="Wind speed (m/s)")
     hour: int = Field(..., ge=0, le=23, description="Hour of day")
     month: int = Field(..., ge=1, le=12, description="Month of year")
     dayofyear: int = Field(..., ge=1, le=366, description="Day of year")
