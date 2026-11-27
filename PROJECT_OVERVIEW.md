@@ -183,3 +183,29 @@ SolarOps is being developed with a few important principles:
 ---
 
 **SolarOps is ultimately about turning solar data into actionable performance intelligence — from understanding what a solar system should produce to identifying when its actual performance tells a different story.**
+
+
+## 9. Backend and Model Serving
+
+SolarOps now includes a FastAPI backend in `apps/api/solarops_api/` that exposes the trained LightGBM v3 model through HTTP endpoints:
+
+- `GET /health`
+- `GET /model/info`
+- `POST /predict`
+
+The Streamlit dashboard in `apps/dashboard/` communicates with the backend over HTTP for prediction. Shared ML logic remains in `src/solarops/`.
+
+Local development:
+
+```bash
+uv run uvicorn solarops_api.main:app --app-dir apps/api --reload
+uv run streamlit run apps/dashboard/app.py
+# or both:
+uv run python scripts/dev.py
+```
+
+Tests:
+
+```bash
+uv run pytest
+```
