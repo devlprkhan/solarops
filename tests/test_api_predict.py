@@ -4,7 +4,7 @@ import math
 import pytest
 from fastapi.testclient import TestClient
 
-from solarops_api.main import app
+from solarops_api.main import _sanitize_validation_value, app
 
 VALID_PAYLOAD = {
     "poa_irradiance": 700.0,
@@ -48,6 +48,10 @@ def test_predict_invalid_values():
         payload = dict(VALID_PAYLOAD, hour=25)
         response = client.post("/predict", json=payload)
         assert response.status_code == 422
+        detail = response.json()["detail"][0]
+        assert detail["loc"] == ["body", "hour"]
+        assert "ctx" in detail
+        assert detail["ctx"] == {"le": 23}
 
 
 def test_predict_model_unavailable():
@@ -71,6 +75,15 @@ def test_predict_rejects_non_finite_temperature(value):
         payload = dict(VALID_PAYLOAD, ambient_temperature=value)
         response = _post(client, payload)
         assert response.status_code == 422
+
+
+def test_sanitize_validation_value_nested():
+    value = {
+        "numbers": [1.0, float("nan"), float("inf"), float("-inf")],
+        "nested": {"x": float("nan")},
+    }
+    sanitized = _sanitize_validation_value(value)
+    assert sanitized == {"numbers": [1.0, None, None, None], "nested": {"x": None}}
 
 
 @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])

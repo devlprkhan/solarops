@@ -46,20 +46,27 @@ app = FastAPI(
 )
 
 
+def _sanitize_validation_value(value):
+    """Recursively replace non-finite floats with None for JSON serialization."""
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
+    if isinstance(value, dict):
+        return {key: _sanitize_validation_value(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_sanitize_validation_value(item) for item in value]
+    if isinstance(value, tuple):
+        return [_sanitize_validation_value(item) for item in value]
+    return value
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     errors = []
     for error in exc.errors():
-        item = {
-            "loc": error.get("loc"),
-            "msg": error.get("msg"),
-            "type": error.get("type"),
-        }
-        value = error.get("input")
-        if isinstance(value, float) and not math.isfinite(value):
-            value = None
-        item["input"] = value
-        errors.append(item)
+        error = dict(error)
+        if "input" in error:
+            error["input"] = _sanitize_validation_value(error["input"])
+        errors.append(error)
     return JSONResponse(status_code=422, content={"detail": errors})
 
 
