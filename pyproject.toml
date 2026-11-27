@@ -1,7 +1,7 @@
 [project]
 name = "solarops"
 version = "0.1.0"
-description = "Add your description here"
+description = "Solar performance intelligence — predict expected AC power and flag underperformance."
 readme = "README.md"
 authors = [
     { name = "devlprkhan", email = "devlpr.khan@gmail.com" }

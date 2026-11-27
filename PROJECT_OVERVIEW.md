@@ -54,9 +54,9 @@ This does not automatically mean that the system has a faulty inverter, dirty pa
 
 SolarOps is intended to grow into an end-to-end machine learning product rather than remain a standalone notebook or model experiment.
 
-The project will evolve through several stages.
+The project is evolving through several stages. Stages 1–3 are complete; Stages 4–5 are in progress.
 
-### Stage 1 — Data Understanding and Baseline
+### Stage 1 — Data Understanding and Baseline ✅ Complete
 
 We begin by understanding the available solar data, its quality, measurements, and relationships.
 
@@ -64,7 +64,9 @@ The first objective is to build a working baseline model that can estimate solar
 
 This gives us a measurable starting point and helps establish whether the available data contains useful predictive information.
 
-### Stage 2 — Machine Learning Development
+**Delivered:** a cleaned 15-minute dataset (207,140 rows), a dummy baseline (196.2 kW MAE), and a linear regression baseline (38.8 kW MAE, R² 0.917).
+
+### Stage 2 — Machine Learning Development ✅ Complete
 
 Once the baseline is established, we improve the prediction system through experimentation and model development.
 
@@ -72,7 +74,9 @@ The objective is not simply to train a model with good results. We want to under
 
 Over time, the model should become more reliable, reusable, and suitable for real-world predictions.
 
-### Stage 3 — Prediction and Performance Analysis
+**Delivered:** v3 LightGBM with time features (25.7 kW MAE, R² 0.952). A v4 experiment with missing-value flags was evaluated but not adopted because it did not improve accuracy.
+
+### Stage 3 — Prediction and Performance Analysis ✅ Complete
 
 The trained model becomes part of a reusable prediction workflow.
 
@@ -86,7 +90,9 @@ Given new solar measurements, the system should be able to:
 
 The prediction and comparison process should work consistently without requiring someone to manually run a notebook.
 
-### Stage 4 — Production-Ready ML System
+**Delivered:** `models/v3.pkl` with versioned metadata, `src/solarops/predict.py` for safe prediction, trust labels (`ok`, `anomaly`, `unreliable_input`), and a dashboard data bridge.
+
+### Stage 4 — Production-Ready ML System 🚧 In Progress
 
 The project will gradually move beyond experimentation into a maintainable machine learning system.
 
@@ -104,7 +110,9 @@ This may include:
 
 The objective is to make the machine learning functionality usable outside the development environment.
 
-### Stage 5 — SolarOps Application and User Experience
+**Done so far:** model persistence/versioning and input validation. **Next:** automated tests, an API, monitoring, retraining, and deployment.
+
+### Stage 5 — SolarOps Application and User Experience 🚧 In Progress
 
 Ultimately, SolarOps should provide a practical way to interact with solar performance intelligence.
 
@@ -120,6 +128,8 @@ Potential capabilities include:
 - Reports that support maintenance and operational decisions.
 
 The exact application design and feature set will evolve as the project develops.
+
+**Delivered:** a 5-page Streamlit website in `app/` (Overview, Anomalies, Investigate, Predict, Model). The design and feature set continue to evolve.
 
 ## 5. Who Is SolarOps For?
 
