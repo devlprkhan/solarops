@@ -72,24 +72,72 @@ data/raw/pvdaq/2023-solar-data-prize/system-2107/
 └── 2107_irradiance_data.csv
 ```
 
-Run the pipeline notebook and launch the main app:
+Run the pipeline notebook and launch the applications:
 
 ```bash
 uv run jupyter lab notebooks/02_clean_pipeline.ipynb
-uv run streamlit run app/app.py
+uv run uvicorn solarops_api.main:app --app-dir apps/api --reload
+uv run streamlit run apps/dashboard/app.py
+```
+
+Or start both together:
+
+```bash
+uv run python scripts/dev.py
 ```
 
 ## Project layout
 
 ```text
-src/solarops/pipeline.py    # load → align → split → impute → evaluate + time features
-src/solarops/predict.py     # model loading + safe prediction (rejects missing POA)
-src/solarops/dashboard.py   # dashboard data bridge, trust labels, anomalies
-app/                        # main 5-page Streamlit website
+src/solarops/               # shared ML and domain package
+apps/api/solarops_api/      # FastAPI backend
+apps/dashboard/             # Streamlit frontend
 models/                     # v3.pkl + metadata
+tests/                      # automated tests
 notebooks/                  # 01–07: exploration → model → reliability → save
 scripts/                    # data audit utilities
 data/                       # local datasets (git-ignored)
+```
+
+## API endpoints
+
+- `GET /health` — API and model status
+- `GET /model/info` — model metadata
+- `POST /predict` — predict expected AC power
+
+Example request:
+
+```json
+{
+  "poa_irradiance": 700.0,
+  "ambient_temperature": 25.0,
+  "wind_speed": 3.0,
+  "hour": 12,
+  "month": 6,
+  "dayofyear": 166
+}
+```
+
+Example response:
+
+```json
+{
+  "predicted_ac_power": 285.4,
+  "unit": "kW",
+  "model_version": "v3"
+}
+```
+
+Swagger UI: http://127.0.0.1:8000/docs
+
+## Environment configuration
+
+`API_BASE_URL` (default `http://127.0.0.1:8000`) configures dashboard-to-backend communication.
+
+## Testing
+
+```bash
+uv run pytest
 ```
 
 ## Notebooks

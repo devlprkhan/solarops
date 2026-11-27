@@ -1,6 +1,7 @@
 """Load a saved model and produce predictions safely."""
 
 import json
+from functools import lru_cache
 from pathlib import Path
 import joblib
 import pandas as pd
@@ -8,6 +9,7 @@ import pandas as pd
 IRRADIANCE_COL = "poa_irradiance_o_149574"
 
 
+@lru_cache(maxsize=4)
 def load_model(path: str | Path) -> tuple:
     """Load model + metadata. Returns (model, metadata_dict)."""
     path = Path(path)
