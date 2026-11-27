@@ -1,6 +1,6 @@
 [project]
 name = "solarops"
-version = "0.1.0"
+version = "0.2.0"
 description = "Solar performance intelligence — predict expected AC power and flag underperformance."
 readme = "README.md"
 authors = [

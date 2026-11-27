@@ -13,8 +13,8 @@ Solar power output depends on irradiance, temperature, wind, and system conditio
 | 1 | Data understanding + baseline | ✅ Complete |
 | 2 | ML development | ✅ Complete — v3 LightGBM |
 | 3 | Prediction + performance analysis | ✅ Complete — saved model + trust labels |
-| 4 | Production-ready ML system | 🚧 In progress |
-| 5 | Application + user experience | 🚧 In progress — Streamlit MVP |
+| 4 | Production-ready ML system | ✅ Complete — FastAPI backend + tests |
+| 5 | Application + user experience | 🚧 In progress — Streamlit MVP + API integration |
 
 ## Results
 
@@ -46,7 +46,7 @@ Chronological split at `2022-07-01`; test period `2022-07-01` → `2023-10-31`.
   - `ok` — features present and `|residual| < 200 kW`.
   - `anomaly` — features present and `|residual| ≥ 200 kW`.
   - `unreliable_input` — POA was missing during daylight (06:00–20:00).
-- Provides a 5-page Streamlit website in `app/`:
+- Provides a 5-page Streamlit website in `apps/dashboard/` plus a FastAPI backend in `apps/api/`:
   - **Overview** — actual vs predicted daylight chart and residual heatmap.
   - **Anomalies** — top residuals with CSV export.
   - **Investigate** — day-level drill-down with POA overlay.
@@ -159,7 +159,8 @@ The project uses **PVDAQ System 2107** from the 2023 Solar Data Prize. The data 
 ## Roadmap / TODO
 
 - Testing and pre-commit hooks are intentionally deferred until the pipeline and model surface stabilise.
-- Next: hyperparameter tuning, better handling of missing irradiance, a FastAPI prediction endpoint, CI, and deployment.
+- Completed: FastAPI prediction endpoint, dashboard API integration, and backend tests.
+- Next: hyperparameter tuning, better handling of missing irradiance, CI, and deployment.
 
 ## License
 
