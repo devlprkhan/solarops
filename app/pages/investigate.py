@@ -1,9 +1,18 @@
 import streamlit as st
 import plotly.graph_objects as go
+
 from solarops.dashboard import load_test_predictions
+from solarops.ui import (
+    inject_styles,
+    page_header,
+    style_figure,
+    COLOR_ACTUAL,
+    COLOR_PREDICTED,
+)
 
 st.set_page_config(page_title="Investigate", page_icon="🔍", layout="wide")
-st.title("🔍 Investigate a day")
+inject_styles()
+page_header("Investigate", "Understand one selected day in context.")
 
 @st.cache_data
 def _load():
@@ -23,16 +32,27 @@ else:
     c3.metric("Anomalies", f"{(d['trust']=='anomaly').sum()}")
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=d["measured_on"], y=d["actual"], name="Actual"))
-    fig.add_trace(go.Scatter(x=d["measured_on"], y=d["predicted"], name="Predicted",
-                             line=dict(dash="dash")))
-    fig.add_trace(go.Scatter(x=d["measured_on"], y=d["poa"], name="POA",
-                             yaxis="y2", opacity=0.35))
+    fig.add_trace(go.Scatter(
+        x=d["measured_on"], y=d["actual"], name="Actual",
+        line=dict(color=COLOR_ACTUAL, width=1.8),
+    ))
+    fig.add_trace(go.Scatter(
+        x=d["measured_on"], y=d["predicted"], name="Predicted (expected)",
+        line=dict(color=COLOR_PREDICTED, width=1.8, dash="dash"),
+    ))
+    fig.add_trace(go.Scatter(
+        x=d["measured_on"], y=d["poa"], name="POA",
+        yaxis="y2", opacity=0.35, line=dict(color="#8A8F8C", width=1),
+    ))
+    style_figure(fig, title="Expected vs actual AC power with POA overlay", height=440)
     fig.update_layout(
-        height=420, hovermode="x unified",
-        yaxis=dict(title="AC power (kW)"),
+        hovermode="x unified",
+        yaxis=dict(title="AC power (kW)", gridcolor="#E6E4DF"),
         yaxis2=dict(title="POA (W/m²)", overlaying="y", side="right", showgrid=False),
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    st.dataframe(d, use_container_width=True)
+    st.caption("See the Anomalies page for the full list of periods that may need attention.")
+
+    with st.expander("Rows for this day"):
+        st.dataframe(d, use_container_width=True, hide_index=True)
