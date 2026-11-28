@@ -1,28 +1,42 @@
-"""SolarOps — STUDENT starter. Build your dashboard here.
+"""SolarOps — STUDENT dashboard. Fast, professional, light/dark compatible.
 Run: uv run streamlit run student-app/streamlit_app.py
-Look at ../app/ for reference (do not copy-paste).
 """
 
 import streamlit as st
+import pandas as pd
 from solarops.dashboard import (
     load_test_predictions, get_model_card, get_anomalies, predict_one,
 )
 
+# Page setup
 st.set_page_config(page_title="SolarOps", layout="wide")
 
-# ---- Caching Data ----
+# CSS for professional look
+st.markdown("""
+    <style>
+    .stMetric { background-color: rgba(128, 128, 128, 0.1); padding: 10px; border-radius: 8px; }
+    .stDataFrame { font-size: 14px; }
+    </style>
+""", unsafe_allow_html=True)
+
+# --- CACHE DATA LOADING ---
 @st.cache_data
 def get_data():
+    # Ye ek hi baar chalta hai
     return load_test_predictions()
+
+@st.cache_data
+def get_precomputed_anomalies(df):
+    # Saare data ke anomalies pehle se nikaal lo taake date change pe fast ho
+    return get_anomalies(df, n=10000)
 
 df = get_data()
 card = get_model_card()
 
-st.title("SolarOps — Solar Performance Intelligence")
-st.caption(f"model {card['version']} · MAE {card['metrics']['MAE']:.1f} kW · "
-           f"R² {card['metrics']['R2']:.3f}")
+st.title("☀️ SolarOps — Solar Performance Intelligence")
+st.caption(f"Model **{card['version']}** · MAE **{card['metrics']['MAE']:.1f} kW** · R² **{card['metrics']['R2']:.3f}**")
 
-# ---- Date picker (done) ----
+# --- PANEL 1: Date Picker ---
 st.sidebar.header("Filters")
 start, end = st.sidebar.date_input(
     "Date range",
@@ -30,41 +44,41 @@ start, end = st.sidebar.date_input(
     min_value=df["measured_on"].min().date(),
     max_value=df["measured_on"].max().date(),
 )
-view = df[(df["measured_on"].dt.date >= start) & (df["measured_on"].dt.date <= end)]
 
-# ---- Panel 2: Actual vs Predicted ----
-st.subheader("Actual vs Predicted")
+# --- FAST FILTERING ---
+# String compare ki bajaye direct datetime compare karo, ye super fast hota hai
+mask = (df["measured_on"] >= pd.to_datetime(start)) & (df["measured_on"] <= pd.to_datetime(end) + pd.Timedelta(days=1))
+view = df[mask]
+
+# --- PANEL 2: Chart ---
+st.subheader("📈 Actual vs Predicted AC Power")
+# Filter daylight
 daylight = view[view["poa"] > 50].set_index("measured_on")[["actual", "predicted"]]
 if len(daylight) == 0:
     st.warning("No daylight data in selected range (poa > 50).")
 else:
     st.line_chart(daylight, color=["#1f77b4", "#ff7f0e"])
 
-# ---- Panel 3: Trust badges (done) ----
-st.subheader("Trust summary")
+# --- PANEL 3: Trust Badges ---
+st.subheader("🛡️ Trust Summary")
 c1, c2, c3 = st.columns(3)
-c1.metric("ok", f"{(view['trust'] == 'ok').sum():,}")
-c2.metric("anomaly", f"{(view['trust'] == 'anomaly').sum():,}")
-c3.metric("unreliable_input", f"{(view['trust'] == 'unreliable_input').sum():,}")
+c1.metric("✅ OK", f"{(view['trust'] == 'ok').sum():,}")
+c2.metric("⚠️ Anomaly", f"{(view['trust'] == 'anomaly').sum():,}")
+c3.metric("❌ Unreliable Input", f"{(view['trust'] == 'unreliable_input').sum():,}")
 
-# ---- Panel 4: Anomalies table ----
-st.subheader("Top anomalies")
+# --- PANEL 4: Anomalies Table ---
+st.subheader("🚨 Top Anomalies (Worst Underperformance)")
+
+# Precomputed anomalies ko use karo
+all_anoms = get_precomputed_anomalies(df)
+
+# Sirf current view wale anomalies chuno
+anoms = all_anoms[all_anoms['measured_on'].isin(view['measured_on'])].head(20)
 
 def highlight_anomalies(row):
     if row['actual'] == 0 or row['residual'] < -400:
         return ['background-color: #ffe6e6; color: #cc0000; font-weight: bold'] * len(row)
     return [''] * len(row)
-
-# Fast Caching Fix: get_anomalies ko cache karne ke liye ek chhota wrapper
-@st.cache_data
-def get_anomalies_cached(df_hash, _view, n=20):
-    # df_hash sirf cache break karne ke liye hai jab data change ho
-    return get_anomalies(_view, n=n)
-
-# view ka hash banayein taake cache samajh sake data change hua hai
-view_hash = hash(view.to_json())
-
-anoms = get_anomalies_cached(view_hash, view, n=20)
 
 if len(anoms) == 0:
     st.info("No anomalies in selected range.")
@@ -78,17 +92,16 @@ else:
         hide_index=True,
     )
     
-    # ---- Extension: Download anomalies as CSV ----
+    # Download CSV Button
     st.download_button(
         label="📥 Download anomalies as CSV",
         data=anoms.to_csv(index=False).encode("utf-8"),
         file_name="solarops_anomalies.csv",
         mime="text/csv",
-        help="Click to download the top anomalies as a CSV file.",
         type="primary"
     )
 
-# ---- Panel 5: Model card (done) ----
-with st.expander("Model card"):
+# --- PANEL 5: Model Card ---
+with st.expander("📋 Model Card"):
     st.json(card)
     
