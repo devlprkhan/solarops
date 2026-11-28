@@ -1,58 +1,60 @@
-"""SolarOps — STUDENT dashboard. Fast, professional, light/dark compatible.
+"""SolarOps — STUDENT dashboard. Ultra-fast optimized version.
 Run: uv run streamlit run student-app/streamlit_app.py
 """
 
 import streamlit as st
 import pandas as pd
 from solarops.dashboard import (
-    load_test_predictions, get_model_card, get_anomalies, predict_one,
+    load_test_predictions, get_model_card, get_anomalies,
 )
 
-# Page setup
 st.set_page_config(page_title="SolarOps", layout="wide")
 
 # CSS for professional look
 st.markdown("""
     <style>
     .stMetric { background-color: rgba(128, 128, 128, 0.1); padding: 10px; border-radius: 8px; }
-    .stDataFrame { font-size: 14px; }
     </style>
 """, unsafe_allow_html=True)
 
 # --- CACHE DATA LOADING ---
 @st.cache_data
 def get_data():
-    # Ye ek hi baar chalta hai
     return load_test_predictions()
 
 @st.cache_data
 def get_precomputed_anomalies(df):
-    # Saare data ke anomalies pehle se nikaal lo taake date change pe fast ho
+    # Saare anomalies ek hi baar mein nikaal kar cache kar liye
     return get_anomalies(df, n=10000)
 
+# Load data instantly from cache
 df = get_data()
 card = get_model_card()
+all_anoms = get_precomputed_anomalies(df)
 
 st.title("☀️ SolarOps — Solar Performance Intelligence")
 st.caption(f"Model **{card['version']}** · MAE **{card['metrics']['MAE']:.1f} kW** · R² **{card['metrics']['R2']:.3f}**")
 
-# --- PANEL 1: Date Picker ---
+# --- PANEL 1: Date Picker inside a FORM for fast interaction ---
 st.sidebar.header("Filters")
-start, end = st.sidebar.date_input(
-    "Date range",
-    value=(df["measured_on"].min().date(), df["measured_on"].max().date()),
-    min_value=df["measured_on"].min().date(),
-    max_value=df["measured_on"].max().date(),
-)
+# FORM ka use: Jab tak Apply nahi dabayenge, app calculate nahi karegi
+with st.sidebar.form("date_form"):
+    start, end = st.date_input(
+        "Select Date Range",
+        value=(df["measured_on"].min().date(), df["measured_on"].max().date()),
+        min_value=df["measured_on"].min().date(),
+        max_value=df["measured_on"].max().date(),
+    )
+    # Apply Button
+    submitted = st.form_submit_button("🚀 Apply Filter", use_container_width=True)
 
 # --- FAST FILTERING ---
-# String compare ki bajaye direct datetime compare karo, ye super fast hota hai
+# Direct datetime comparison (super fast)
 mask = (df["measured_on"] >= pd.to_datetime(start)) & (df["measured_on"] <= pd.to_datetime(end) + pd.Timedelta(days=1))
 view = df[mask]
 
 # --- PANEL 2: Chart ---
 st.subheader("📈 Actual vs Predicted AC Power")
-# Filter daylight
 daylight = view[view["poa"] > 50].set_index("measured_on")[["actual", "predicted"]]
 if len(daylight) == 0:
     st.warning("No daylight data in selected range (poa > 50).")
@@ -69,10 +71,7 @@ c3.metric("❌ Unreliable Input", f"{(view['trust'] == 'unreliable_input').sum()
 # --- PANEL 4: Anomalies Table ---
 st.subheader("🚨 Top Anomalies (Worst Underperformance)")
 
-# Precomputed anomalies ko use karo
-all_anoms = get_precomputed_anomalies(df)
-
-# Sirf current view wale anomalies chuno
+# Precomputed anomalies se sirf current view wale filter karo (instant)
 anoms = all_anoms[all_anoms['measured_on'].isin(view['measured_on'])].head(20)
 
 def highlight_anomalies(row):
@@ -92,7 +91,7 @@ else:
         hide_index=True,
     )
     
-    # Download CSV Button
+    # Extension: Download CSV
     st.download_button(
         label="📥 Download anomalies as CSV",
         data=anoms.to_csv(index=False).encode("utf-8"),
