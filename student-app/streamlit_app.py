@@ -31,9 +31,10 @@ start, end = st.sidebar.date_input(
 )
 view = df[(df["measured_on"].dt.date >= start) & (df["measured_on"].dt.date <= end)]
 
-# ---- Panel 2: Actual vs Predicted  ← TODO ----
+# ---- Panel 2: Actual vs Predicted  ← TODO (Ab bhara hua hai) ----
 st.subheader("Actual vs Predicted")
-st.info("TODO: view[view['poa'] > 50].set_index('measured_on')[['actual','predicted']] → st.line_chart")
+chart_data = view[view["poa"] > 50].set_index("measured_on")[["actual", "predicted"]]
+st.line_chart(chart_data)
 
 # ---- Panel 3: Trust badges (done) ----
 st.subheader("Trust summary")
@@ -42,10 +43,11 @@ c1.metric("ok", f"{(view['trust'] == 'ok').sum():,}")
 c2.metric("anomaly", f"{(view['trust'] == 'anomaly').sum():,}")
 c3.metric("unreliable_input", f"{(view['trust'] == 'unreliable_input').sum():,}")
 
-# ---- Panel 4: Anomalies table  ← TODO ----
+# ---- Panel 4: Anomalies table  ← TODO (Ab bhara hua hai) ----
 st.subheader("Top anomalies")
-st.info("TODO: st.dataframe(get_anomalies(view, n=20))")
+st.dataframe(get_anomalies(view, n=20))
 
 # ---- Panel 5: Model card (done) ----
 with st.expander("Model card"):
     st.json(card)
+    
