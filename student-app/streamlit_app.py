@@ -50,7 +50,6 @@ c3.metric("unreliable_input", f"{(view['trust'] == 'unreliable_input').sum():,}"
 st.subheader("Top anomalies")
 
 def highlight_anomalies(row):
-    # Numbers ko check karna (text banane se pehle)
     if row['actual'] == 0 or row['residual'] < -400:
         return ['background-color: #ffe6e6; color: #cc0000; font-weight: bold'] * len(row)
     return [''] * len(row)
@@ -62,7 +61,6 @@ else:
     display_cols = ["measured_on", "actual", "predicted", "residual", "trust"]
     anoms_display = anoms[display_cols].copy()
     
-    # Colored table dikhana (Streamlit style) - Asli numbers ke sath check karein
     st.dataframe(
         anoms_display.style.apply(highlight_anomalies, axis=1).format(precision=2),
         use_container_width=True,
@@ -82,3 +80,4 @@ else:
 # ---- Panel 5: Model card (done) ----
 with st.expander("Model card"):
     st.json(card)
+    
