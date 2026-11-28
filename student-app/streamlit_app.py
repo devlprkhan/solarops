@@ -31,10 +31,20 @@ start, end = st.sidebar.date_input(
 )
 view = df[(df["measured_on"].dt.date >= start) & (df["measured_on"].dt.date <= end)]
 
+<<<<<<< HEAD
 # ---- Panel 2: Actual vs Predicted  ← TODO (Ab bhara hua hai) ----
 st.subheader("Actual vs Predicted")
 chart_data = view[view["poa"] > 50].set_index("measured_on")[["actual", "predicted"]]
 st.line_chart(chart_data)
+=======
+# ---- Panel 2: Actual vs Predicted ----
+st.subheader("Actual vs Predicted")
+daylight = view[view["poa"] > 50].set_index("measured_on")[["actual", "predicted"]]
+if len(daylight) == 0:
+    st.warning("No daylight data in selected range (poa > 50).")
+else:
+    st.line_chart(daylight, color=["#1f77b4", "#ff7f0e"])
+>>>>>>> main
 
 # ---- Panel 3: Trust badges (done) ----
 st.subheader("Trust summary")
@@ -43,9 +53,44 @@ c1.metric("ok", f"{(view['trust'] == 'ok').sum():,}")
 c2.metric("anomaly", f"{(view['trust'] == 'anomaly').sum():,}")
 c3.metric("unreliable_input", f"{(view['trust'] == 'unreliable_input').sum():,}")
 
+<<<<<<< HEAD
 # ---- Panel 4: Anomalies table  ← TODO (Ab bhara hua hai) ----
 st.subheader("Top anomalies")
 st.dataframe(get_anomalies(view, n=20))
+=======
+# ---- Panel 4: Anomalies table ----
+st.subheader("Top anomalies")
+
+def highlight_anomalies(row):
+    # Numbers ko check karna (text banane se pehle)
+    if row['actual'] == 0 or row['residual'] < -400:
+        return ['background-color: #ffe6e6; color: #cc0000; font-weight: bold'] * len(row)
+    return [''] * len(row)
+
+anoms = get_anomalies(view, n=20)
+if len(anoms) == 0:
+    st.info("No anomalies in selected range.")
+else:
+    display_cols = ["measured_on", "actual", "predicted", "residual", "trust"]
+    anoms_display = anoms[display_cols].copy()
+    
+    # Colored table dikhana (Streamlit style) - Asli numbers ke sath check karein
+    st.dataframe(
+        anoms_display.style.apply(highlight_anomalies, axis=1).format(precision=2),
+        use_container_width=True,
+        hide_index=True,
+    )
+    
+    # ---- Extension: Download anomalies as CSV ----
+    st.download_button(
+        label="📥 Download anomalies as CSV",
+        data=anoms.to_csv(index=False).encode("utf-8"),
+        file_name="solarops_anomalies.csv",
+        mime="text/csv",
+        help="Click to download the top anomalies as a CSV file.",
+        type="primary"
+    )
+>>>>>>> main
 
 # ---- Panel 5: Model card (done) ----
 with st.expander("Model card"):

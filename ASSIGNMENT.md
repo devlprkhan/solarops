@@ -70,7 +70,7 @@ Before you build, run **our** production app:
 uv run streamlit run app/app.py
 ```
 
-Click through all 6 pages: **Overview · Anomalies · Investigate · Predict · Model**.
+Click through all 5 pages: **Overview · Anomalies · Investigate · Predict · Model**.
 
 **What you're looking at:**
 
@@ -186,7 +186,7 @@ Don't try it.
 - `predict()` wrapped in bare `try/except`
 - App doesn't launch on reviewer's machine
 - No `NOTES.md`
-- **Near-identical copy of `app/streamlit_app.py`** — will be caught in review
+- **Near-identical copy of the main `app/` website** — will be caught in review
 
 ---
 

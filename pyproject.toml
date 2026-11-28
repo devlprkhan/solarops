@@ -1,13 +1,15 @@
 [project]
 name = "solarops"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.2.0"
+description = "Solar performance intelligence — predict expected AC power and flag underperformance."
 readme = "README.md"
 authors = [
     { name = "devlprkhan", email = "devlpr.khan@gmail.com" }
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "fastapi>=0.115.0",
+    "httpx>=0.27.0",
     "lightgbm>=4.7.0",
     "matplotlib>=3.11.2",
     "numpy>=2.5.4",
@@ -16,10 +18,15 @@ dependencies = [
     "pyarrow>=26.0.1",
     "streamlit>=1.67.0",
     "universal-data-cleaner>=2.11.0",
+    "uvicorn>=0.30.0",
 ]
 
 [project.scripts]
 solarops = "solarops:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "apps/api"]
+testpaths = ["tests"]
 
 [build-system]
 requires = ["uv_build>=0.13.7,<0.14.0"]
@@ -29,4 +36,5 @@ build-backend = "uv_build"
 dev = [
     "ipykernel>=7.4.0",
     "jupyterlab>=4.6.6",
+    "pytest>=8.0.0",
 ]
