@@ -10,6 +10,7 @@ from solarops.dashboard import (
 
 st.set_page_config(page_title="SolarOps", layout="wide")
 
+# ---- Caching Data ----
 @st.cache_data
 def get_data():
     return load_test_predictions()
@@ -54,7 +55,17 @@ def highlight_anomalies(row):
         return ['background-color: #ffe6e6; color: #cc0000; font-weight: bold'] * len(row)
     return [''] * len(row)
 
-anoms = get_anomalies(view, n=20)
+# Fast Caching Fix: get_anomalies ko cache karne ke liye ek chhota wrapper
+@st.cache_data
+def get_anomalies_cached(df_hash, _view, n=20):
+    # df_hash sirf cache break karne ke liye hai jab data change ho
+    return get_anomalies(_view, n=n)
+
+# view ka hash banayein taake cache samajh sake data change hua hai
+view_hash = hash(view.to_json())
+
+anoms = get_anomalies_cached(view_hash, view, n=20)
+
 if len(anoms) == 0:
     st.info("No anomalies in selected range.")
 else:
